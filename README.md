@@ -1,20 +1,72 @@
-dataseries: Switzerland's Data Series in One Place
-==================================================
+# dataseries: Switzerland's Data Series in One Place
 
-Tools to download and import time series from
-[www.dataseries.org](http://www.dataseries.org).
+Download and import open Swiss economic time series from
+[dataseries.org](https://dataseries.org), a comprehensive and up-to-date
+collection of public data from Switzerland. The package talks to the public
+[dataseries.org API](https://api.dataseries.org) and imports series as a
+`data.frame` or `ts` object.
 
-The packages contains a single function, `ds`, which downloads series from
-[www.dataseries.org](http://www.dataseries.org) as a `data.frame` or `xts`.
+## Installation
 
-To install:
+```r
+install.packages("dataseries")
+```
 
-    install.packages("dataseries")
+## Data model
 
-Usage:
+Data on dataseries.org is organized into **datasets**. A dataset is a family of
+related series and, in most cases, a multi-dimensional *cube* — a single time
+series is one cell of that cube, addressed by the dataset plus one code per
+dimension. For example the GDP dataset (`ch_seco_gdp`) splits along three
+dimensions: `type` (nominal/real/…), `structure` (GDP, value added, …) and
+`seas_adj` (seasonally adjusted or not).
 
-    dataseries::ds(c("CCI.AIK", "CCI.ASSS"))
-    dataseries::ds(c("CCI.AIK", "CCI.ASSS"), "ts")
-    dataseries::ds(c("CCI.AIK", "CCI.ASSS"), "xts")
+- `ds_catalog()` lists every dataset.
+- `ds_search(pattern)` is a flat, searchable list of the individual series.
+- `ds_meta(id)` describes a dataset's dimensions and the codes within them.
+- `ds(id, ...)` downloads series.
 
-    dataseries::inventory()  # inventory of all available series
+## Usage
+
+```r
+library(dataseries)
+
+# Browse what's available
+ds_catalog()
+
+# Find a specific series across all datasets
+ds_search("unemployment")
+
+# A dataset's dimensions and codes
+ds_meta("ch_seco_gdp")
+
+# Whole dataset (long data.frame)
+ds("ch_fso_cpi")
+
+# One series: pass dimension codes as named arguments
+ds("ch_fso_cpi", item = "100_100")
+
+# Several series, restricted to a date range
+ds("ch_fso_cpi", item = c("100_100", "100_1"), from = "2020-01-01")
+
+# One cell of a multi-dimensional cube, as a ts object
+ds("ch_seco_gdp", type = "real", structure = "gdp", seas_adj = "csa",
+   class = "ts")
+```
+
+All series on dataseries.org are regular (annual, quarterly or monthly), so
+`ts` covers them. If you prefer `xts`, convert the `ts` in one line:
+`xts::as.xts(ds("ch_fso_cpi", item = "100_100", class = "ts"))`.
+
+Dimension arguments are optional: omit them and you get the whole dataset.
+Filtering happens on the server, so selecting one series does not download the
+whole cube. Downloads are cached in memory for the session; `cache_rm()` forces
+a fresh download.
+
+## Beyond R
+
+Every series is also available as a plain CSV from any tool that can read a URL:
+
+```
+https://api.dataseries.org/series.csv?dataset=ch_fso_cpi&dims=item=100_100
+```

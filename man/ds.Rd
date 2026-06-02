@@ -2,45 +2,70 @@
 % Please edit documentation in R/ds.R
 \name{ds}
 \alias{ds}
-\alias{cache_ls}
-\alias{cache_rm}
-\title{Download Time Series from \href{http://www.dataseries.org}{www.dataseries.org}}
+\title{Download time series from dataseries.org}
 \usage{
-ds(id, class = c("data.frame", "ts", "xts"))
-
-cache_ls()
-
-cache_rm()
+ds(dataset, ..., from = NULL, to = NULL, class = c("data.frame", "ts"))
 }
 \arguments{
-\item{id}{one ore more IDs, as given by
-\href{http://www.dataseries.org}{www.dataseries.org}.}
+\item{dataset}{a single dataset \code{id}, as listed by \code{\link[=ds_catalog]{ds_catalog()}}.}
 
-\item{class}{class of the return value, either a \code{"data.frame"} (default) or
-an \code{"xts"} object (requires the \code{xts} package to be installed).}
+\item{...}{dimension filters, given as named arguments where each name is a
+dimension of \code{dataset} and each value is one or more codes, e.g.
+\code{type = "real"} or \code{structure = c("gdp", "gva")}. A single named list may be
+passed instead, which is convenient programmatically (e.g. from the output
+of \code{\link[=ds_search]{ds_search()}}). See \code{\link[=ds_meta]{ds_meta()}} for the available dimensions and codes.}
+
+\item{from, to}{optional date bounds (a \code{Date} or an ISO \code{"YYYY-MM-DD"}
+string) that restrict the returned range, inclusive.}
+
+\item{class}{class of the return value: \code{"data.frame"} (the default, one row
+per observation in long format) or \code{"ts"}. For \code{"ts"} the selected series
+are laid out as columns, one per cell. (To obtain an \pkg{xts} object,
+wrap the result: \code{xts::as.xts(ds(..., class = "ts"))}.)}
+}
+\value{
+A \code{data.frame} or \code{ts}/\code{mts} object, or \code{NULL} if the selection is
+empty.
 }
 \description{
-\code{ds} downloads time series from
-\href{http://www.dataseries.org}{www.dataseries.org}. Data can be imported as a
-\code{data.frame} or an \code{xts} object.
+\code{ds()} downloads open Swiss economic time series from
+\href{https://dataseries.org}{dataseries.org}.
 }
 \details{
-Downloaded series are \strong{cached in memory} as long as the
-R session is open. If you want to force an update, either restart the R
-session or run \code{cache_rm} to emtpy the cache. \code{cache_ls} is a utility
-function that lists all cached objects (see examples).
+Data on dataseries.org is organized into \strong{datasets}. A dataset is a family
+of related series and is, in most cases, a multi-dimensional \emph{cube}: a single
+time series is one cell of the cube, addressed by the dataset plus one code
+per dimension. Pass those codes as \strong{named arguments} (the names are the
+dimension names, see \code{\link[=ds_meta]{ds_meta()}}):
+
+\if{html}{\out{<div class="sourceCode r">}}\preformatted{ds("ch_seco_gdp", type = "real", structure = "gdp", seas_adj = "csa")
+}\if{html}{\out{</div>}}
+
+Dimension arguments are optional. Omit them and you get the whole dataset
+(all series, in long format). A few datasets are a single series and take no
+dimensions at all (e.g. \code{ds("ch_kof_barometer")}). Filtering happens on the
+server, so selecting one series does not download the whole cube.
+
+Downloads are \strong{cached in memory} for the session. Run \code{\link[=cache_rm]{cache_rm()}} to force
+a fresh download.
 }
 \examples{
-\dontrun{
-ds(c("CCI.AIK", "CCI.ASSS"))               # data.frame
-ds(c("CCI.AIK", "CCI.ASSS"), "ts")         # "ts" object
-ds(c("CCI.AIK", "CCI.ASSS"), "xts")        # "xts" object
+\donttest{
+# whole dataset (long data.frame)
+ds("ch_fso_cpi")
 
-# list cached objects
-cache_ls()
+# one series, by dimension code
+ds("ch_fso_cpi", item = "100_100")
 
-# empty in-memory cache, which forces a fresh download
-cache_rm()
+# several series, restricted to a date range
+ds("ch_fso_cpi", item = c("100_100", "100_1"), from = "2020-01-01")
+
+# as a ts object
+ds("ch_seco_gdp", type = "real", structure = "gdp", seas_adj = "csa",
+   class = "ts")
 }
-
+}
+\seealso{
+\code{\link[=ds_catalog]{ds_catalog()}} for the list of datasets and \code{\link[=ds_meta]{ds_meta()}} for a
+dataset's dimensions.
 }

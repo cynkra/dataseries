@@ -1,15 +1,27 @@
 Package: dataseries
 Type: Package
 Title: Switzerland's Data Series in One Place
-Version: 0.2.0
-Date: 2017-04-29
-Author: Christoph Sax
-Maintainer: Christoph Sax <christoph.sax@gmail.com>
-Description: Download and import time series from <http://www.dataseries.org>, a comprehensive and up-to-date collection of open data from Switzerland.
-Suggests: 
-  xts
+Version: 1.0.0
+Authors@R: c(
+    person("Christoph", "Sax", email = "christoph.sax@gmail.com",
+           role = c("aut", "cre")),
+    person("Jannes", "Muenchow", email = "malnamalja@gmx.de",
+           role = "ctb"))
+Description: Download and import open Swiss economic time series from
+    'dataseries.org' <https://dataseries.org>, a comprehensive and
+    up-to-date collection of public data from Switzerland. Series are
+    retrieved through the public 'dataseries.org' API and imported as a
+    'data.frame' or 'ts' object.
 License: GPL-3
-URL: http://www.dataseries.org
-BugReports: https://github.com/christophsax/dataseries
+URL: https://dataseries.org, https://github.com/christophsax/dataseries
+BugReports: https://github.com/christophsax/dataseries/issues
+Imports:
+    jsonlite,
+    stats,
+    utils
+Suggests:
+    testthat (>= 3.0.0)
+Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 6.0.1
+RoxygenNote: 7.3.3
+Config/testthat/edition: 3
