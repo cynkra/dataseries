@@ -8,9 +8,14 @@ collection of public data from Switzerland. The package talks to the public
 
 ## Installation
 
+The current version, which talks to the new dataseries.org API, lives on GitHub:
+
 ```r
-install.packages("dataseries")
+# install.packages("remotes")
+remotes::install_github("cynkra/dataseries")
 ```
+
+(The version on CRAN is the older 0.2.0 release and predates the API.)
 
 ## Data model
 
