@@ -1,5 +1,11 @@
 # dataseries: Switzerland's Data Series in One Place
 
+<!-- badges: start -->
+[![R-CMD-check](https://github.com/cynkra/dataseries/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/cynkra/dataseries/actions/workflows/R-CMD-check.yaml)
+[![Codecov test coverage](https://codecov.io/gh/cynkra/dataseries/graph/badge.svg)](https://app.codecov.io/gh/cynkra/dataseries)
+[![CRAN status](https://www.r-pkg.org/badges/version/dataseries)](https://CRAN.R-project.org/package=dataseries)
+<!-- badges: end -->
+
 Download and import open Swiss economic time series from
 [dataseries.org](https://dataseries.org), a comprehensive and up-to-date
 collection of public data from Switzerland. The package talks to the public
