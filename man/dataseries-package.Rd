@@ -26,8 +26,8 @@ are a single series and need no dimensions at all.
 Useful links:
 \itemize{
   \item \url{https://dataseries.org}
-  \item \url{https://github.com/christophsax/dataseries}
-  \item Report bugs at \url{https://github.com/christophsax/dataseries/issues}
+  \item \url{https://github.com/cynkra/dataseries}
+  \item Report bugs at \url{https://github.com/cynkra/dataseries/issues}
 }
 
 }

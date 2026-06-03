@@ -161,7 +161,8 @@ matrix_to_ts <- function(mat, dates) {
   freq <- guess_frequency(dates)
   if (is.na(freq)) {
     stop("cannot represent this series as a 'ts' object (daily or irregular ",
-         "spacing). Use class = \"xts\" instead.", call. = FALSE)
+         "spacing). Use the default class = \"data.frame\" (e.g. build an xts ",
+         "object with xts::xts(d$value, d$date)).", call. = FALSE)
   }
   by   <- switch(as.character(freq), "12" = "month", "4" = "3 months", "1" = "year")
   grid <- seq(min(dates), max(dates), by = by)
