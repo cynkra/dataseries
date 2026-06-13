@@ -1,7 +1,7 @@
 # dataseries 1.0.0
 
 This is a ground-up rewrite. dataseries.org now serves its data through a public
-API (<https://api.dataseries.org>), and the package has been rebuilt around it.
+API (`api.dataseries.org`), and the package has been rebuilt around it.
 The old flat series identifiers (e.g. `"CCI.AIK"`) no longer exist, so this
 release is **not backward compatible**.
 

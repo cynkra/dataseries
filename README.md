@@ -9,7 +9,7 @@
 Download and import open Swiss economic time series from
 [dataseries.org](https://dataseries.org), a comprehensive and up-to-date
 collection of public data from Switzerland. The package talks to the public
-[dataseries.org API](https://api.dataseries.org) and imports series as a
+[dataseries.org API](https://dataseries.org) and imports series as a
 `data.frame` or `ts` object.
 
 ## Installation
