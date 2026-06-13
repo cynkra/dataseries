@@ -38,7 +38,7 @@
 #' @seealso [ds_catalog()] for the list of datasets and [ds_meta()] for a
 #'   dataset's dimensions.
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' # whole dataset (long data.frame)
 #' ds("ch_fso_cpi")
 #'

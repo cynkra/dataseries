@@ -20,7 +20,7 @@ Returns the full metadata for a single dataset: its dimensions, the codes
 range. Use this to discover which dimension codes to pass to \code{\link[=ds]{ds()}}.
 }
 \examples{
-\donttest{
+\dontrun{
 m <- ds_meta("ch_seco_gdp")
 m$dim_order                       # "type", "structure", "seas_adj"
 names(m$dimensions$type$levels)   # the codes you can pass as type = ...

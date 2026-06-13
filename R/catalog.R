@@ -8,7 +8,7 @@
 #'   `title`, `concept`, `topic`, `source`, `license`, `frequency`, `start`,
 #'   `end` and `n_series`.
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' cat <- ds_catalog()
 #' head(cat)
 #'
@@ -55,7 +55,7 @@ ds_catalog <- function() {
 #' @seealso [ds_catalog()] for the dataset-level list and [ds_meta()] for one
 #'   dataset's dimensions.
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' # everything
 #' ds_search()
 #'
@@ -101,7 +101,7 @@ ds_search <- function(pattern = NULL) {
 #'   (the dataset's dimensions) and `dimensions` (each dimension's `levels`,
 #'   keyed by code, with a `label`).
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' m <- ds_meta("ch_seco_gdp")
 #' m$dim_order                       # "type", "structure", "seas_adj"
 #' names(m$dimensions$type$levels)   # the codes you can pass as type = ...

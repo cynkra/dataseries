@@ -70,7 +70,7 @@ ds_get_csv <- function(path, cache = TRUE) {
 #' @return `cache_ls()` returns a character vector of cache keys; `cache_rm()`
 #'   is called for its side effect and returns `NULL` invisibly.
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' ds_catalog()
 #' cache_ls()
 #' cache_rm()

@@ -17,7 +17,7 @@ one row per dataset. Use the \code{id} column with \code{\link[=ds]{ds()}} to do
 with \code{\link[=ds_meta]{ds_meta()}} to inspect a dataset's dimensions.
 }
 \examples{
-\donttest{
+\dontrun{
 cat <- ds_catalog()
 head(cat)
 

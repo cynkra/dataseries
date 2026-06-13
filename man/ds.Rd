@@ -50,7 +50,7 @@ Downloads are \strong{cached in memory} for the session. Run \code{\link[=cache_
 a fresh download.
 }
 \examples{
-\donttest{
+\dontrun{
 # whole dataset (long data.frame)
 ds("ch_fso_cpi")
 

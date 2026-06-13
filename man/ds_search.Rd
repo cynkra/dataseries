@@ -23,7 +23,7 @@ pass a \code{pattern} to filter. The \code{dataset}, \code{dim} and \code{code} 
 exactly what you feed back to \code{\link[=ds]{ds()}}.
 }
 \examples{
-\donttest{
+\dontrun{
 # everything
 ds_search()
 

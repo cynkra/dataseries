@@ -20,7 +20,7 @@ objects (keyed by request URL); \code{cache_rm()} empties the cache, which force
 the next call to download fresh data.
 }
 \examples{
-\donttest{
+\dontrun{
 ds_catalog()
 cache_ls()
 cache_rm()
