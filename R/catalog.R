@@ -4,6 +4,9 @@
 #' one row per dataset. Use the `id` column with [ds()] to download data and
 #' with [ds_meta()] to inspect a dataset's dimensions.
 #'
+#' @param lang language of the human-readable columns (`title`, `concept` and
+#'   `source`): one of `"en"` (the default), `"de"`, `"fr"` or `"it"`. Falls
+#'   back to English where a translation is missing.
 #' @return A `data.frame` with one row per dataset and the columns `id`,
 #'   `title`, `concept`, `topic`, `source`, `license`, `frequency`, `start`,
 #'   `end` and `n_series`.
@@ -14,17 +17,21 @@
 #'
 #' # search the catalog
 #' cat[grepl("price", cat$title, ignore.case = TRUE), c("id", "title")]
+#'
+#' # German titles
+#' ds_catalog(lang = "de")
 #' }
 #' @export
-ds_catalog <- function() {
+ds_catalog <- function(lang = "en") {
+  ds_check_lang(lang)
   raw <- ds_get_json("/catalog", simplify = FALSE)
   rows <- lapply(raw, function(d) {
     data.frame(
       id        = ds_scalar(d$id),
-      title     = ds_label(d$title),
-      concept   = ds_scalar(d$concept),
-      topic     = ds_scalar(d$topic),
-      source    = ds_source_name(d$source),
+      title     = ds_label(d$title, lang),
+      concept   = ds_label(d$concept, lang),
+      topic     = ds_topic_key(d$topic),
+      source    = ds_source_name(d$source, lang),
       license   = ds_scalar(d$license),
       frequency = ds_scalar(d$frequency),
       start     = ds_scalar(d$start),
@@ -50,6 +57,10 @@ ds_catalog <- function() {
 #' @param pattern optional search string, treated as a case-insensitive regular
 #'   expression and matched against the series `label` and `dataset_title`. When
 #'   `NULL` (the default) the full table is returned.
+#' @param lang language of the `dataset_title`, `label` and `path` columns: one
+#'   of `"en"` (the default), `"de"`, `"fr"` or `"it"`. `pattern` is matched
+#'   against the labels in this language, so searching in German finds German
+#'   terms. Falls back to English where a translation is missing.
 #' @return A `data.frame` with the columns `dataset`, `dataset_title`,
 #'   `frequency`, `dim`, `code`, `label` and `path`.
 #' @seealso [ds_catalog()] for the dataset-level list and [ds_meta()] for one
@@ -63,19 +74,24 @@ ds_catalog <- function() {
 #' hits <- ds_search("unemployment")
 #' head(hits)
 #' ds(hits$dataset[1], setNames(list(hits$code[1]), hits$dim[1]))
+#'
+#' # search in German
+#' ds_search("arbeitslosen", lang = "de")
 #' }
 #' @export
-ds_search <- function(pattern = NULL) {
+ds_search <- function(pattern = NULL, lang = "en") {
+  ds_check_lang(lang)
   raw <- ds_get_json("/search-index.json", simplify = FALSE)
   rows <- lapply(raw, function(e) {
     data.frame(
       dataset       = ds_scalar(e$datasetId),
-      dataset_title = ds_label(e$datasetTitle),
+      dataset_title = ds_label(e$datasetTitle, lang),
       frequency     = ds_scalar(e$freq),
       dim           = ds_scalar(e$dim),
       code          = ds_scalar(e$code),
-      label         = ds_label(e$label),
-      path          = paste(unlist(e$path), collapse = " / "),
+      label         = ds_label(e$label, lang),
+      path          = paste(vapply(e$path, ds_label, character(1), lang = lang),
+                            collapse = " / "),
       stringsAsFactors = FALSE
     )
   })

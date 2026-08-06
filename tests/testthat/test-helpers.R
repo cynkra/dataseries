@@ -45,3 +45,40 @@ test_that("ds_label prefers English and tolerates plain strings", {
   expect_equal(ds_label("GDP"), "GDP")
   expect_true(is.na(ds_label(NULL)))
 })
+
+test_that("ds_label picks the requested language, falling back to English", {
+  x <- list(en = "GDP", de = "BIP", fr = "PIB", it = "PIL")
+  expect_equal(ds_label(x, "de"), "BIP")
+  expect_equal(ds_label(x, "fr"), "PIB")
+  expect_equal(ds_label(x, "it"), "PIL")
+  # missing translation falls back to English, not to an arbitrary language
+  expect_equal(ds_label(list(en = "GDP", fr = "PIB"), "de"), "GDP")
+  # no English either: take what is there
+  expect_equal(ds_label(list(fr = "PIB"), "de"), "PIB")
+  expect_equal(ds_label("GDP", "de"), "GDP")
+})
+
+test_that("ds_check_lang accepts the four languages and rejects others", {
+  for (l in c("en", "de", "fr", "it")) expect_equal(ds_check_lang(l), l)
+  expect_error(ds_check_lang("es"), "must be one of")
+  expect_error(ds_check_lang(c("de", "fr")), "must be one of")
+  expect_error(ds_check_lang(1), "must be one of")
+})
+
+test_that("ds_topic_key takes the stable key, not the translated name", {
+  expect_equal(
+    ds_topic_key(list(key = "prices", name = list(en = "Prices", de = "Preise"))),
+    "prices"
+  )
+  expect_equal(ds_topic_key("prices"), "prices")
+  expect_true(is.na(ds_topic_key(NULL)))
+  expect_true(is.na(ds_topic_key(list())))
+})
+
+test_that("ds_source_name follows the requested language", {
+  src <- list(key = "seco", name = list(en = "SECO", de = "SECO (DE)"))
+  expect_equal(ds_source_name(src), "SECO")
+  expect_equal(ds_source_name(src, "de"), "SECO (DE)")
+  expect_equal(ds_source_name("FSO"), "FSO")
+  expect_true(is.na(ds_source_name(NULL)))
+})

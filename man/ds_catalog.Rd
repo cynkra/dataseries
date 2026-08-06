@@ -4,7 +4,12 @@
 \alias{ds_catalog}
 \title{Catalog of available datasets}
 \usage{
-ds_catalog()
+ds_catalog(lang = "en")
+}
+\arguments{
+\item{lang}{language of the human-readable columns (\code{title}, \code{concept} and
+\code{source}): one of \code{"en"} (the default), \code{"de"}, \code{"fr"} or \code{"it"}. Falls
+back to English where a translation is missing.}
 }
 \value{
 A \code{data.frame} with one row per dataset and the columns \code{id},
@@ -23,5 +28,8 @@ head(cat)
 
 # search the catalog
 cat[grepl("price", cat$title, ignore.case = TRUE), c("id", "title")]
+
+# German titles
+ds_catalog(lang = "de")
 }
 }

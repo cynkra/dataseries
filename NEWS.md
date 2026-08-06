@@ -1,4 +1,25 @@
-# dataseries 1.0.1
+# dataseries 1.1.0
+
+## New features
+
+- `ds_catalog()` and `ds_search()` gain a `lang` argument (`"en"`, `"de"`,
+  `"fr"` or `"it"`). dataseries.org publishes its labels in all four
+  languages and the package used to discard everything but English. Searching
+  also matches in the chosen language, so `ds_search("arbeitslosen", lang =
+  "de")` works. Missing translations fall back to English.
+
+## Bug fixes
+
+- The `concept` and `topic` columns of `ds_catalog()` were `NA` for every
+  dataset. Both are objects in the API and were being read as if they were
+  plain strings. `concept` now holds the (translated) concept and `topic` the
+  stable topic key.
+
+- The `path` column of `ds_search()` repeated each element once per language,
+  e.g. `"Total / Total / Total / Totale"`. It now holds the path in the
+  chosen language.
+
+## Other
 
 - Relicensed from GPL-3 to MIT.
 

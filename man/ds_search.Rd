@@ -4,12 +4,17 @@
 \alias{ds_search}
 \title{Search for series across all datasets}
 \usage{
-ds_search(pattern = NULL)
+ds_search(pattern = NULL, lang = "en")
 }
 \arguments{
 \item{pattern}{optional search string, treated as a case-insensitive regular
 expression and matched against the series \code{label} and \code{dataset_title}. When
 \code{NULL} (the default) the full table is returned.}
+
+\item{lang}{language of the \code{dataset_title}, \code{label} and \code{path} columns: one
+of \code{"en"} (the default), \code{"de"}, \code{"fr"} or \code{"it"}. \code{pattern} is matched
+against the labels in this language, so searching in German finds German
+terms. Falls back to English where a translation is missing.}
 }
 \value{
 A \code{data.frame} with the columns \code{dataset}, \code{dataset_title},
@@ -31,6 +36,9 @@ ds_search()
 hits <- ds_search("unemployment")
 head(hits)
 ds(hits$dataset[1], setNames(list(hits$code[1]), hits$dim[1]))
+
+# search in German
+ds_search("arbeitslosen", lang = "de")
 }
 }
 \seealso{

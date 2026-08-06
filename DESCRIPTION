@@ -1,7 +1,7 @@
 Package: dataseries
 Type: Package
 Title: Switzerland's Data Series in One Place
-Version: 1.0.1
+Version: 1.1.0
 Authors@R: c(
     person("Christoph", "Sax", email = "christoph.sax@gmail.com",
            role = c("aut", "cre")),
