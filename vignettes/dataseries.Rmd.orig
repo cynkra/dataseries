@@ -83,7 +83,7 @@ Which dimensions does a dataset have? `ds_meta()` tells you:
 
 ```{r meta}
 m <- ds_meta("ch_seco_gdp")
-m$dim_order
+unlist(m$dim_order)
 names(m$dimensions$type$levels)
 ```
 
@@ -100,7 +100,7 @@ tail(gdp)
 Every series on dataseries.org is regular (annual, quarterly or monthly), so it
 maps cleanly onto R's `ts` class. Pass `class = "ts"`:
 
-```{r ts, fig.width = 7, fig.height = 3.5, fig.alt = "Swiss real GDP, seasonally adjusted, since 1980"}
+```{r ts, fig.width = 7, fig.height = 3.5, fig.cap = "Swiss real GDP, seasonally adjusted, since 1980", fig.alt = "Line chart of Swiss real GDP from 1980 to 2026, rising with dips around 2009 and 2020"}
 gdp_ts <- ds("ch_seco_gdp", type = "real", structure = "gdp", seas_adj = "csa",
              class = "ts")
 plot(gdp_ts, main = "Swiss real GDP, seasonally adjusted",
@@ -139,11 +139,13 @@ Where a translation is missing, English is used.
 ## Caching
 
 Everything downloaded is cached in memory for the session, so repeating a call
-costs nothing. `cache_rm()` empties the cache and forces a fresh download:
+costs nothing. `cache_ls()` shows what is held, keyed by request URL, and
+`cache_rm()` empties it to force a fresh download:
 
 ```{r cache}
-cache_ls()
+length(cache_ls())
 cache_rm()
+length(cache_ls())
 ```
 
 ## Beyond R

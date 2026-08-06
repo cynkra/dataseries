@@ -117,15 +117,8 @@ Which dimensions does a dataset have? `ds_meta()` tells you:
 
 ``` r
 m <- ds_meta("ch_seco_gdp")
-m$dim_order
-#> [[1]]
-#> [1] "type"
-#> 
-#> [[2]]
-#> [1] "structure"
-#> 
-#> [[3]]
-#> [1] "seas_adj"
+unlist(m$dim_order)
+#> [1] "type"      "structure" "seas_adj"
 names(m$dimensions$type$levels)
 #> [1] "nom"  "real" "gc_q" "gc_y"
 ```
@@ -160,8 +153,8 @@ plot(gdp_ts, main = "Swiss real GDP, seasonally adjusted",
 ```
 
 <div class="figure">
-<img src="ts-1.png" alt="Swiss real GDP, seasonally adjusted, since 1980"  />
-<p class="caption">plot of chunk ts</p>
+<img src="ts-1.png" alt="Line chart of Swiss real GDP from 1980 to 2026, rising with dips around 2009 and 2020"  />
+<p class="caption">Swiss real GDP, seasonally adjusted, since 1980</p>
 </div>
 
 Select several cells and you get an `mts` with one column per series:
@@ -215,19 +208,16 @@ Where a translation is missing, English is used.
 ## Caching
 
 Everything downloaded is cached in memory for the session, so repeating a call
-costs nothing. `cache_rm()` empties the cache and forces a fresh download:
+costs nothing. `cache_ls()` shows what is held, keyed by request URL, and
+`cache_rm()` empties it to force a fresh download:
 
 
 ``` r
-cache_ls()
-#> [1] "csv:https://api.dataseries.org/series.csv?dataset=ch_fso_cpi"                                                     
-#> [2] "csv:https://api.dataseries.org/series.csv?dataset=ch_fso_cpi&dims=item%3D100_100&from=2015-01-01"                 
-#> [3] "csv:https://api.dataseries.org/series.csv?dataset=ch_fso_cpi&dims=item%3D100_100%2C100_1&from=2020-01-01"         
-#> [4] "csv:https://api.dataseries.org/series.csv?dataset=ch_seco_gdp&dims=type%3Dreal%3Bstructure%3Dgdp%3Bseas_adj%3Dcsa"
-#> [5] "json:https://api.dataseries.org/catalog"                                                                          
-#> [6] "json:https://api.dataseries.org/dataset/ch_seco_gdp/meta"                                                         
-#> [7] "json:https://api.dataseries.org/search-index.json"
+length(cache_ls())
+#> [1] 7
 cache_rm()
+length(cache_ls())
+#> [1] 0
 ```
 
 ## Beyond R
