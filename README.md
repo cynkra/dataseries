@@ -79,6 +79,20 @@ Filtering happens on the server, so selecting one series does not download the
 whole cube. Downloads are cached in memory for the session; `cache_rm()` forces
 a fresh download.
 
+## Labels in German, French or Italian
+
+The catalog and search index are translated. Pass `lang` to get titles and
+labels in any Swiss national language (English is used where a translation is
+missing):
+
+```r
+ds_catalog(lang = "de")
+ds_search("arbeitslosen", lang = "de")
+```
+
+Searching matches the labels in the chosen language, so you can look for German
+terms directly.
+
 ## Beyond R
 
 In Python, use the [dataseries](https://github.com/cynkra/dataseries-py)
