@@ -1,6 +1,11 @@
-# dataseries (development version)
+# dataseries 1.0.1
 
 - Relicensed from GPL-3 to MIT.
+
+- The README no longer points to GitHub for the current version; 1.0.0 and
+  later are on CRAN.
+
+- Added a pointer to the Python package, which mirrors this interface.
 
 # dataseries 1.0.0
 

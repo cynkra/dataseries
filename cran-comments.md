@@ -4,6 +4,7 @@
 
 ## Notes
 
-* Major update (0.2.0 -> 1.0.0), rebuilt around the new dataseries.org API;
-  not backward compatible (see NEWS.md).
+* Patch release. The package is relicensed from GPL-3 to MIT (the copyright
+  holder is the sole author of the current code base), and the README no
+  longer directs users to GitHub for the current version.
 * There are no reverse dependencies.

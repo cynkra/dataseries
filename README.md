@@ -14,14 +14,19 @@ collection of public data from Switzerland. The package talks to the public
 
 ## Installation
 
-The current version, which talks to the new dataseries.org API, lives on GitHub:
+```r
+install.packages("dataseries")
+```
+
+Or the development version from GitHub:
 
 ```r
 # install.packages("remotes")
 remotes::install_github("cynkra/dataseries")
 ```
 
-(The version on CRAN is the older 0.2.0 release and predates the API.)
+A [Python package](https://github.com/cynkra/dataseries-py) with the same
+interface is available on PyPI.
 
 ## Data model
 
@@ -75,6 +80,9 @@ whole cube. Downloads are cached in memory for the session; `cache_rm()` forces
 a fresh download.
 
 ## Beyond R
+
+In Python, use the [dataseries](https://github.com/cynkra/dataseries-py)
+package, which mirrors this interface and returns pandas DataFrames.
 
 Every series is also available as a plain CSV from any tool that can read a URL:
 
