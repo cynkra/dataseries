@@ -4,7 +4,7 @@ Title: Switzerland's Data Series in One Place
 Version: 1.1.0
 Authors@R: c(
     person("Christoph", "Sax", email = "christoph.sax@gmail.com",
-           role = c("aut", "cre")),
+           role = c("aut", "cre", "cph")),
     person("Jannes", "Muenchow", email = "malnamalja@gmx.de",
            role = "ctb"))
 Description: Download and import open Swiss economic time series from
