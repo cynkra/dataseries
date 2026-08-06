@@ -2,6 +2,9 @@
 
 ## New features
 
+- New vignette, `vignette("dataseries")`, introducing dataseries.org and
+  walking through the package.
+
 - `ds_catalog()` and `ds_search()` gain a `lang` argument (`"en"`, `"de"`,
   `"fr"` or `"it"`). dataseries.org publishes its labels in all four
   languages and the package used to discard everything but English. Searching

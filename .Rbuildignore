@@ -4,3 +4,5 @@
 ^.*\.tar\.gz$
 ^\.git$
 ^LICENSE\.md$
+^vignettes/.*\.orig$
+^vignettes/precompute\.R$

@@ -1,0 +1,157 @@
+---
+title: "Getting started with dataseries"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Getting started with dataseries}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>", fig.path = "")
+options(width = 80)
+library(dataseries)
+```
+
+## What is dataseries.org?
+
+Switzerland publishes a lot of official statistics, but they are spread across
+many providers: the Federal Statistical Office, SECO, the National Bank, the
+Federal Finance Administration and others. Each has its own portal, its own
+file formats and its own update schedule.
+
+[dataseries.org](https://dataseries.org) collects them in one place. It tracks
+the sources, harmonises them into a single structure and keeps them current.
+This package is a client for its public API, so you can pull any of those
+series straight into R.
+
+## How the data is organised
+
+Data comes in **datasets**. A dataset is a family of related series and is
+usually a multi-dimensional *cube*: one time series is a single cell of that
+cube, addressed by the dataset plus one code per dimension.
+
+Four functions cover the whole package:
+
+- `ds_catalog()` lists the datasets.
+- `ds_search()` lists the individual series, so you can grep for one.
+- `ds_meta()` describes a dataset's dimensions and their codes.
+- `ds()` downloads.
+
+## Finding something
+
+Start with the catalog. One row per dataset:
+
+```{r catalog}
+cat <- ds_catalog()
+nrow(cat)
+head(cat[, c("id", "title", "frequency", "n_series")])
+```
+
+If you know roughly what you want, `ds_search()` is finer grained. It returns
+one row per series across all datasets:
+
+```{r search}
+hits <- ds_search("unemployment rate")
+head(hits[, c("dataset", "dim", "code", "label")])
+```
+
+The `dataset`, `dim` and `code` columns are exactly what `ds()` expects, so a
+search result can be fed straight back in.
+
+## Downloading
+
+The simplest call takes a dataset id and returns every series in it, in long
+format:
+
+```{r cpi-all}
+cpi <- ds("ch_fso_cpi")
+head(cpi)
+```
+
+To pick one series, pass the dimension codes as named arguments. Filtering
+happens on the server, so this does not download the whole cube first:
+
+```{r cpi-one}
+total <- ds("ch_fso_cpi", item = "100_100", from = "2015-01-01")
+head(total)
+```
+
+## Working with cubes
+
+Which dimensions does a dataset have? `ds_meta()` tells you:
+
+```{r meta}
+m <- ds_meta("ch_seco_gdp")
+m$dim_order
+names(m$dimensions$type$levels)
+```
+
+So the GDP dataset splits three ways, and a single cell needs one code from
+each:
+
+```{r gdp}
+gdp <- ds("ch_seco_gdp", type = "real", structure = "gdp", seas_adj = "csa")
+tail(gdp)
+```
+
+## Time series objects
+
+Every series on dataseries.org is regular (annual, quarterly or monthly), so it
+maps cleanly onto R's `ts` class. Pass `class = "ts"`:
+
+```{r ts, fig.width = 7, fig.height = 3.5, fig.alt = "Swiss real GDP, seasonally adjusted, since 1980"}
+gdp_ts <- ds("ch_seco_gdp", type = "real", structure = "gdp", seas_adj = "csa",
+             class = "ts")
+plot(gdp_ts, main = "Swiss real GDP, seasonally adjusted",
+     ylab = "CHF million", col = "steelblue")
+```
+
+Select several cells and you get an `mts` with one column per series:
+
+```{r mts}
+two <- ds("ch_fso_cpi", item = c("100_100", "100_1"), from = "2020-01-01",
+          class = "ts")
+head(two)
+```
+
+For `xts`, convert in one line:
+`xts::as.xts(ds("ch_fso_cpi", item = "100_100", class = "ts"))`.
+
+## Labels in other languages
+
+The providers publish their labels in German, French and Italian as well, and
+dataseries.org keeps them. Pass `lang` to `ds_catalog()` or `ds_search()`:
+
+```{r lang}
+head(ds_catalog(lang = "de")[, c("id", "title")])
+```
+
+Searching matches the labels in the chosen language, so German terms work
+directly:
+
+```{r lang-search}
+ds_search("arbeitslosen", lang = "de")[, c("dataset", "code", "label")]
+```
+
+Where a translation is missing, English is used.
+
+## Caching
+
+Everything downloaded is cached in memory for the session, so repeating a call
+costs nothing. `cache_rm()` empties the cache and forces a fresh download:
+
+```{r cache}
+cache_ls()
+cache_rm()
+```
+
+## Beyond R
+
+The same data is available from Python through the
+[dataseries](https://github.com/cynkra/dataseries-py) package, and as plain CSV
+from any tool that can read a URL:
+
+```
+https://api.dataseries.org/series.csv?dataset=ch_fso_cpi&dims=item=100_100
+```
