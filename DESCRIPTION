@@ -12,7 +12,7 @@ Description: Download and import open Swiss economic time series from
     up-to-date collection of public data from Switzerland. Series are
     retrieved through the public 'dataseries.org' API and imported as a
     'data.frame' or 'ts' object.
-License: GPL-3
+License: MIT + file LICENSE
 URL: https://dataseries.org, https://github.com/cynkra/dataseries
 BugReports: https://github.com/cynkra/dataseries/issues
 Imports:

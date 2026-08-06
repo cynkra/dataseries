@@ -1,3 +1,7 @@
+# dataseries (development version)
+
+- Relicensed from GPL-3 to MIT.
+
 # dataseries 1.0.0
 
 This is a ground-up rewrite. dataseries.org now serves its data through a public
