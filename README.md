@@ -25,8 +25,8 @@ Or the development version from GitHub:
 remotes::install_github("cynkra/dataseries")
 ```
 
-A [Python package](https://github.com/cynkra/dataseries-py) with the same
-interface is available on PyPI.
+A [Python package](https://pypi.org/project/dataseries/) with the same
+interface is available: `pip install dataseries`.
 
 ## Data model
 
@@ -95,8 +95,8 @@ terms directly.
 
 ## Beyond R
 
-In Python, use the [dataseries](https://github.com/cynkra/dataseries-py)
-package, which mirrors this interface and returns pandas DataFrames.
+In Python, use the [dataseries](https://pypi.org/project/dataseries/) package,
+which mirrors this interface and returns pandas DataFrames.
 
 Every series is also available as a plain CSV from any tool that can read a URL:
 

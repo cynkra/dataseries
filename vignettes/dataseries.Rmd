@@ -223,8 +223,8 @@ length(cache_ls())
 ## Beyond R
 
 The same data is available from Python through the
-[dataseries](https://github.com/cynkra/dataseries-py) package, and as plain CSV
-from any tool that can read a URL:
+[dataseries](https://pypi.org/project/dataseries/) package (`pip install
+dataseries`), and as plain CSV from any tool that can read a URL:
 
 ```
 https://api.dataseries.org/series.csv?dataset=ch_fso_cpi&dims=item=100_100
