@@ -70,7 +70,7 @@ ds <- function(dataset, ..., from = NULL, to = NULL,
 
   switch(class,
     data.frame = df,
-    ts         = series_to_ts(df)
+    ts         = series_to_ts(df, ds_meta_frequency(dataset))
   )
 }
 
@@ -103,7 +103,12 @@ ds_fetch_series <- function(dataset, dims = list(), from = NULL, to = NULL) {
   if (!is.null(from)) qs <- c(qs, paste0("from=", as.character(from)))
   if (!is.null(to))   qs <- c(qs, paste0("to=", as.character(to)))
 
-  df <- ds_get_csv(paste0("/series.csv?", paste(qs, collapse = "&")))
+  # The API answers an unknown dataset, dimension or code with HTTP 400/404,
+  # which read.csv() reports as a failed download. Work out what was wrong.
+  df <- tryCatch(
+    ds_get_csv(paste0("/series.csv?", paste(qs, collapse = "&"))),
+    ds_request_error = function(e) ds_diagnose(dataset, dims, e)
+  )
 
   # The API answers an unknown/empty dataset with a one-column "error" CSV.
   if ("error" %in% names(df) && !("value" %in% names(df))) {
@@ -124,9 +129,51 @@ ds_fetch_series <- function(dataset, dims = list(), from = NULL, to = NULL) {
 }
 
 
+# Explain a failed /series.csv request. The dataset's metadata (which the API
+# serves with status 200) tells apart an unknown dataset, dimension or code
+# from a real network failure. Always signals an error.
+ds_diagnose <- function(dataset, dims, err) {
+  # If the metadata cannot be fetched either, the problem is the network.
+  m <- tryCatch(ds_meta(dataset), ds_request_error = function(e) stop(err))
+  valid <- as.character(unlist(m$dim_order))
+  fmt <- function(x) if (length(x)) paste(x, collapse = ", ") else "(none)"
+  for (i in seq_along(dims)) {
+    nm <- names(dims)[i]
+    if (is.null(nm) || !(nm %in% valid)) {
+      stop("unknown dimension '", nm, "' for dataset '", dataset,
+           "'. Valid dimensions: ", fmt(valid), ". See ds_meta().",
+           call. = FALSE)
+    }
+    codes <- names(m$dimensions[[nm]]$levels)
+    bad <- setdiff(as.character(dims[[i]]), codes)
+    if (length(bad)) {
+      stop("unknown code ", paste0("'", bad, "'", collapse = ", "),
+           " for dimension '", nm, "' of dataset '", dataset,
+           "'. Valid codes: ", fmt(codes), ".", call. = FALSE)
+    }
+  }
+  stop("the dataseries.org API rejected the request (", err$url, "): ",
+       err$reason, call. = FALSE)
+}
+
+
+# The ts frequency given by a dataset's metadata (`frequency` field), or NA if
+# it is missing or not representable (daily, weekly).
+ds_meta_frequency <- function(dataset) {
+  f <- tryCatch(ds_meta(dataset)$frequency, error = function(e) NULL)
+  freq_from_label(f)
+}
+
+freq_from_label <- function(x) {
+  if (!is.character(x) || length(x) != 1L) return(NA_real_)
+  switch(x, monthly = 12, quarterly = 4, "semi-annual" = 2, annual = 1,
+         NA_real_)
+}
+
+
 # Reshape the long data.frame to one column per series (cell) and return it as a
 # `ts`/`mts` object. Column names are the dimension codes joined by ".".
-series_to_ts <- function(df) {
+series_to_ts <- function(df, freq = NA_real_) {
   dimcols <- setdiff(names(df), c("date", "value"))
 
   key <- if (length(dimcols)) {
@@ -141,30 +188,33 @@ series_to_ts <- function(df) {
                 dimnames = list(NULL, keys))
   mat[cbind(match(df$date, dates), match(key, keys))] <- df$value
 
-  matrix_to_ts(mat, dates)
+  matrix_to_ts(mat, dates, freq)
 }
 
 
 # Guess a ts frequency from the spacing of (sorted, unique) dates. Returns 1
-# (annual), 4 (quarterly) or 12 (monthly), or NA for finer/irregular spacing.
+# (annual), 2 (semi-annual), 4 (quarterly) or 12 (monthly), or NA for
+# finer/irregular spacing.
 guess_frequency <- function(dates) {
   if (length(dates) < 2L) return(NA_real_)
   step <- stats::median(as.numeric(diff(sort(unique(dates)))))
-  if (step >= 350) 1 else if (step >= 80) 4 else if (step >= 25) 12 else NA_real_
+  if (step >= 350) 1 else if (step >= 150) 2 else if (step >= 80) 4 else if (step >= 25) 12 else NA_real_
 }
 
 
 # Place a date-by-series value matrix onto a regular time grid and wrap it in a
 # `ts` object. A regular grid (with NA for gaps) is required because `ts` assumes
-# evenly spaced observations.
-matrix_to_ts <- function(mat, dates) {
-  freq <- guess_frequency(dates)
+# evenly spaced observations. `freq` is the frequency from the dataset's
+# metadata; when it is NA the frequency is guessed from the dates.
+matrix_to_ts <- function(mat, dates, freq = NA_real_) {
+  if (is.na(freq)) freq <- guess_frequency(dates)
   if (is.na(freq)) {
     stop("cannot represent this series as a 'ts' object (daily or irregular ",
          "spacing). Use the default class = \"data.frame\" (e.g. build an xts ",
          "object with xts::xts(d$value, d$date)).", call. = FALSE)
   }
-  by   <- switch(as.character(freq), "12" = "month", "4" = "3 months", "1" = "year")
+  by   <- switch(as.character(freq), "12" = "month", "4" = "3 months", "2" = "6 months",
+               "1" = "year")
   grid <- seq(min(dates), max(dates), by = by)
 
   out <- matrix(NA_real_, nrow = length(grid), ncol = ncol(mat),
@@ -176,6 +226,7 @@ matrix_to_ts <- function(mat, dates) {
   start <- switch(as.character(freq),
     "12" = c(y, m),
     "4"  = c(y, (m - 1L) %/% 3L + 1L),
+    "2"  = c(y, (m - 1L) %/% 6L + 1L),
     "1"  = y
   )
 
