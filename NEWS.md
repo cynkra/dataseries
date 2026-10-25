@@ -1,3 +1,15 @@
+# dataseries (development version)
+
+## Bug fixes
+
+- The dimension code `"NA"` was read as a missing value, e.g. `D0` was `NA` for
+  every row of `ds("ch_snb_bopcapbalq", D0 = "NA")`. All dimension columns are
+  now read verbatim as character; only an empty `value` is missing.
+
+- Dimension names were mangled by `read.csv()`, e.g. `"Offene Stellen"` came
+  back as `Offene.Stellen`. Column names now equal the API's dimension names
+  exactly.
+
 # dataseries 1.1.0
 
 ## New features
