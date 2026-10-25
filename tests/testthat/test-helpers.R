@@ -17,6 +17,7 @@ test_that("build_dims rejects unnamed filters", {
 test_that("guess_frequency classifies common spacings", {
   expect_equal(guess_frequency(seq(as.Date("2000-01-01"), by = "month", length.out = 24)), 12)
   expect_equal(guess_frequency(seq(as.Date("2000-01-01"), by = "3 months", length.out = 24)), 4)
+  expect_equal(guess_frequency(seq(as.Date("2000-01-01"), by = "6 months", length.out = 24)), 2)
   expect_equal(guess_frequency(seq(as.Date("2000-01-01"), by = "year", length.out = 24)), 1)
   expect_true(is.na(guess_frequency(seq(as.Date("2000-01-01"), by = "day", length.out = 24))))
   expect_true(is.na(guess_frequency(as.Date("2000-01-01"))))
@@ -81,4 +82,49 @@ test_that("ds_source_name follows the requested language", {
   expect_equal(ds_source_name(src, "de"), "SECO (DE)")
   expect_equal(ds_source_name("FSO"), "FSO")
   expect_true(is.na(ds_source_name(NULL)))
+})
+
+test_that("semi-annual data becomes a frequency-2 ts, not a gappy quarterly one", {
+  # Surveyed in April and October: first half = period 1, second half = period 2
+  dates <- as.Date(c("1998-10-01", "1999-04-01", "1999-10-01", "2000-04-01"))
+  mat   <- matrix(c(78.7, 80.9, 81.2, 82), ncol = 1, dimnames = list(NULL, "x"))
+  out   <- matrix_to_ts(mat, dates)
+  expect_equal(frequency(out), 2)
+  expect_equal(start(out), c(1998, 2))
+  expect_equal(as.numeric(out), c(78.7, 80.9, 81.2, 82))
+  expect_false(anyNA(out))
+
+  # same via the frequency given by the dataset metadata
+  expect_equal(matrix_to_ts(mat, dates, freq = 2), out)
+  # a lone observation cannot be guessed, but the metadata frequency works
+  one <- matrix_to_ts(mat[1, , drop = FALSE], dates[1], freq = 2)
+  expect_equal(frequency(one), 2)
+  expect_equal(start(one), c(1998, 2))
+  expect_error(matrix_to_ts(mat[1, , drop = FALSE], dates[1]), "cannot represent")
+})
+
+test_that("freq_from_label maps the metadata frequency to a ts frequency", {
+  expect_equal(freq_from_label("monthly"), 12)
+  expect_equal(freq_from_label("quarterly"), 4)
+  expect_equal(freq_from_label("semi-annual"), 2)
+  expect_equal(freq_from_label("annual"), 1)
+  expect_true(is.na(freq_from_label("daily")))
+  expect_true(is.na(freq_from_label("weekly")))
+  expect_true(is.na(freq_from_label(NULL)))
+})
+
+test_that("class = 'ts' uses the metadata frequency for semi-annual data", {
+  csv <- paste("worktype,date,value",
+               "total,1998-10-01,78.7", "total,1999-04-01,80.9",
+               "total,1999-10-01,81.2", sep = "\n")
+  local_mocked_bindings(
+    ds_get_csv = function(path, cache = TRUE) read_series_csv(text = csv),
+    ds_get_json = function(path, simplify = FALSE, cache = TRUE) {
+      list(id = "ch_fso_construction_prices", frequency = "semi-annual")
+    }
+  )
+  x <- ds("ch_fso_construction_prices", class = "ts")
+  expect_equal(frequency(x), 2)
+  expect_equal(start(x), c(1998, 2))
+  expect_equal(as.numeric(x), c(78.7, 80.9, 81.2))
 })

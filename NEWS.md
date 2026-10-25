@@ -2,6 +2,16 @@
 
 ## Bug fixes
 
+- An unknown dataset, dimension or code was reported as "could not reach the
+  dataseries.org API". `ds()` now says what is wrong, e.g. `unknown dimension
+  'item' for dataset 'ch_fso_construction_prices'. Valid dimensions: worktype`.
+  "Could not reach" is kept for real network failures.
+
+- `ds(class = "ts")` returned a quarterly series with every other value `NA`
+  for semi-annual datasets such as `ch_fso_construction_prices`. It now returns
+  a series with frequency 2 (first half = period 1). The frequency is taken from
+  the dataset's metadata where available.
+
 - The dimension code `"NA"` was read as a missing value, e.g. `D0` was `NA` for
   every row of `ds("ch_snb_bopcapbalq", D0 = "NA")`. All dimension columns are
   now read verbatim as character; only an empty `value` is missing.

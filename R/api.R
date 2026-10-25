@@ -19,6 +19,39 @@ cache_set <- function(key, value) {
   invisible(value)
 }
 
+# A failed request. `reason` is the underlying R error message. Callers that
+# know more (see ds_diagnose()) can turn it into a more specific message.
+ds_request_error <- function(url, reason) {
+  structure(
+    class = c("ds_request_error", "error", "condition"),
+    list(
+      message = paste0("could not reach the dataseries.org API (", url, "): ",
+                       reason),
+      call = NULL, url = url, reason = reason
+    )
+  )
+}
+
+# Run `expr`; on failure signal a ds_request_error. The download failure itself
+# (e.g. "HTTP status was '404 Not Found'") arrives as a warning ahead of the
+# error, so keep it as the reason instead of letting it print.
+ds_try_request <- function(expr, url) {
+  warned <- NULL
+  tryCatch(
+    withCallingHandlers(
+      expr,
+      warning = function(w) {
+        warned <<- c(warned, conditionMessage(w))
+        invokeRestart("muffleWarning")
+      }
+    ),
+    error = function(e) {
+      reason <- if (length(warned)) warned[length(warned)] else conditionMessage(e)
+      stop(ds_request_error(url, reason))
+    }
+  )
+}
+
 # GET a path and parse the JSON body. `simplify = FALSE` keeps the nested list
 # structure (used for metadata); `TRUE` lets jsonlite simplify where it can.
 ds_get_json <- function(path, simplify = FALSE, cache = TRUE) {
@@ -28,13 +61,7 @@ ds_get_json <- function(path, simplify = FALSE, cache = TRUE) {
     hit <- cache_get(key)
     if (!is.null(hit)) return(hit)
   }
-  out <- tryCatch(
-    jsonlite::fromJSON(url, simplifyVector = simplify),
-    error = function(e) {
-      stop("could not reach the dataseries.org API (", url, "): ",
-           conditionMessage(e), call. = FALSE)
-    }
-  )
+  out <- ds_try_request(jsonlite::fromJSON(url, simplifyVector = simplify), url)
   if (cache) cache_set(key, out)
   out
 }
@@ -64,13 +91,7 @@ ds_get_csv <- function(path, cache = TRUE) {
     hit <- cache_get(key)
     if (!is.null(hit)) return(hit)
   }
-  out <- tryCatch(
-    read_series_csv(url),
-    error = function(e) {
-      stop("could not reach the dataseries.org API (", url, "): ",
-           conditionMessage(e), call. = FALSE)
-    }
-  )
+  out <- ds_try_request(read_series_csv(url), url)
   if (cache) cache_set(key, out)
   out
 }

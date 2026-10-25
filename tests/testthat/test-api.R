@@ -96,3 +96,25 @@ test_that("ds() keeps dimension names verbatim", {
   expect_true(all(by_args[["Offene Stellen"]] == code))
   expect_equal(by_args, by_list)
 })
+
+test_that("ds() says what is wrong for unknown datasets, dimensions and codes", {
+  skip_api()
+  expect_error(ds("ch_nope"), "unknown dataset: 'ch_nope'")
+  expect_error(ds("ch_fso_construction_prices", nope = "1"),
+               "unknown dimension 'nope'.*worktype")
+  expect_error(ds("ch_fso_construction_prices", worktype = "nope"),
+               "unknown code 'nope'.*hochbau")
+  expect_no_match(
+    tryCatch(ds("ch_nope"), error = conditionMessage),
+    "could not reach"
+  )
+})
+
+test_that("ds() returns a semi-annual dataset as a frequency-2 ts", {
+  skip_api()
+  x <- ds("ch_fso_construction_prices", worktype = "total", class = "ts")
+  expect_s3_class(x, "ts")
+  expect_equal(frequency(x), 2)
+  expect_equal(start(x), c(1998, 2))
+  expect_false(anyNA(x))
+})
