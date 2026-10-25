@@ -74,3 +74,25 @@ test_that("ds_meta() exposes dimensions and a clear error for unknown ids", {
   expect_true(length(m$dimensions$type$levels) > 0)
   expect_error(ds_meta("no_such_dataset"), "unknown dataset")
 })
+
+test_that("ds() keeps the dimension code \"NA\" (not read as missing)", {
+  skip_api()
+  x <- ds("ch_snb_bopcapbalq", D0 = "NA", D1 = "A")
+  expect_true(nrow(x) > 0)
+  expect_false(anyNA(x$D0))
+  expect_true(all(x$D0 == "NA"))
+})
+
+test_that("ds() keeps dimension names verbatim", {
+  skip_api()
+  x <- ds("ch_fso_vacancies")
+  expect_true(all(c("Wirtschaftsabteilung", "Offene Stellen") %in% names(x)))
+  expect_false("Offene.Stellen" %in% names(x))
+  # selecting by a dimension name with a space works, as args and as a list
+  code <- x[["Offene Stellen"]][1]
+  by_args <- ds("ch_fso_vacancies", `Offene Stellen` = code)
+  by_list <- ds("ch_fso_vacancies", list(`Offene Stellen` = code))
+  expect_true(nrow(by_args) > 0)
+  expect_true(all(by_args[["Offene Stellen"]] == code))
+  expect_equal(by_args, by_list)
+})

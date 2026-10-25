@@ -39,8 +39,23 @@ ds_get_json <- function(path, simplify = FALSE, cache = TRUE) {
   out
 }
 
-# GET a /series.csv path and read it as a data.frame. All columns are read as
-# character (dimension codes such as "100_100" must not be coerced to numbers);
+# Parse series CSV (a URL, or the CSV itself via `text`). Every column is read
+# as character with no NA conversion, so dimension codes survive verbatim
+# ("NA", "01", "100_100"); an empty `value` field stays "" and becomes NA when
+# the caller converts it. Column names are kept exactly as sent (check.names =
+# FALSE), because they are the API's dimension names.
+read_series_csv <- function(file, text = NULL) {
+  args <- list(stringsAsFactors = FALSE, colClasses = "character",
+               na.strings = character(), check.names = FALSE,
+               encoding = "UTF-8")
+  if (is.null(text)) {
+    do.call(utils::read.csv, c(list(file), args))
+  } else {
+    do.call(utils::read.csv, c(list(text = text), args))
+  }
+}
+
+# GET a /series.csv path and read it as a data.frame (see read_series_csv());
 # `date` and `value` are converted by the caller.
 ds_get_csv <- function(path, cache = TRUE) {
   url <- paste0(ds_api_url(), path)
@@ -50,7 +65,7 @@ ds_get_csv <- function(path, cache = TRUE) {
     if (!is.null(hit)) return(hit)
   }
   out <- tryCatch(
-    utils::read.csv(url, stringsAsFactors = FALSE, colClasses = "character"),
+    read_series_csv(url),
     error = function(e) {
       stop("could not reach the dataseries.org API (", url, "): ",
            conditionMessage(e), call. = FALSE)
